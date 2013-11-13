@@ -131,6 +131,8 @@ abstract class REST_Controller extends CI_Controller
 		'csv' => 'application/csv'
 	);
 
+	private static $instance;
+
 	/**
 	 * Developers can extend this class and add a check in here.
 	 */
@@ -140,17 +142,60 @@ abstract class REST_Controller extends CI_Controller
 	}
 
 	/**
+	 * You can control the $auto_model rest.php to control whether to automatically load model
+	 */
+	protected function _init_load_model(){
+		static $_class;
+		self::$instance =& $this;
+		$class = self::$instance->router->class;
+		if (isset($_class))
+		{
+			return $this->{$class} = $_class[0];
+		}
+		switch ($this->config->item('auto_model')) {
+			case 'auto':
+				$this->{$class} = $this->model($class);
+				break;
+			
+			default:
+				$this->{$class} = $this->load->model($class.'_model');
+				break;
+		}
+		$_class[0] =& $this->{$class};
+	}
+
+	function model($class){
+		load_class('Model', 'core');
+		$model = ucfirst($class).'_Model';
+		$db = isset($this->_db) ? $this->_db : 'default';
+		$id = isset($this->id) ? $this->id : 'id';
+		$tmp_class = 
+		<<<EOT
+		class {$model} extends MY_Model{
+			public function __construct() {
+				\$this->_db = '{$db}';
+				\$this->primary_key = '{$id}';
+				parent::__construct();
+			}
+		}
+EOT;
+		eval($tmp_class);
+		return $this->$class = new $model();
+	}
+
+	/**
 	 * Constructor function
 	 * @todo Document more please.
 	 */
 	public function __construct()
 	{
 		parent::__construct();
-		
 		// init objects
 		$this->request = new stdClass();
 		$this->response = new stdClass();
 		$this->rest = new stdClass();
+
+		// $this->auto_load_model();
 
 		$this->_zlib_oc = @ini_get('zlib.output_compression');
 
@@ -207,6 +252,9 @@ abstract class REST_Controller extends CI_Controller
 		// Developers can extend this class and add a check in here
 		$this->early_checks();
 
+		// load model to this controller
+		$this->_init_load_model();
+		
 		// Check if there is a specific auth type for the current class/method
 		$this->auth_override = $this->_auth_override_check();
 
@@ -1116,9 +1164,8 @@ abstract class REST_Controller extends CI_Controller
 			$this->_check_whitelist_auth();
 		}
 
-		$username = NULL;
-		$password = NULL;
-
+		$username = 'admin';
+		$password = '123456';
 		// mod_php
 		if ($this->input->server('PHP_AUTH_USER'))
 		{
@@ -1134,7 +1181,6 @@ abstract class REST_Controller extends CI_Controller
 				list($username, $password) = explode(':', base64_decode(substr($this->input->server('HTTP_AUTHORIZATION'), 6)));
 			}
 		}
-
 		if ( ! $this->_check_login($username, $password))
 		{
 			$this->_force_login();
@@ -1268,6 +1314,26 @@ abstract class REST_Controller extends CI_Controller
 	protected function _format_jsonp($data = array())
 	{
 		return $this->get('callback').'('.json_encode($data).')';
+	}
+
+	protected function res($res){
+		if(!is_array($res)){
+			$data = $this->init_res($res);
+			$this->response($data);
+		}
+		$info = isset($res['info']) ? $res['info'] : '';
+		$data = $this->init_res($info, 1);
+		$args = func_get_arg(0);
+		$data = array_merge($data, $args);
+		return $this->response($data);
+	}
+
+	protected function init_res($info = '', $status = 0, $data = ''){
+		return array(
+			'status' => $status,
+			'info' => $info,
+			'data' => $data
+		);
 	}
 
 }

@@ -14,6 +14,35 @@ _Note: for 1.7.x support download v2.2 from Downloads tab_
 
 Drag and drop the **application/libraries/Format.php** and **application/libraries/REST_Controller.php** files into your application's directories. Either autoload the `REST_Controller` class or `require_once` it at the top of your controllers to load it into the scope. Additionally, copy the **rest.php** file from **application/config** in your application's configuration directory.
 
+## Auto Loading Model
+By configuring **rest.php** of $auto_model, you can automatically load the model and the model that corresponds to the current controller,
+In the constructor, by setting the `$this->_db` and `$this->primary_key` you can control the current database and primary key.
+So, codeigniter `MVC` architecture of the `VC` can be adapted into a framework or a MVC architecture
+
+	class Examples extends REST_Controller
+	{
+		function __construct()
+	    {
+	        $this->_db = '';
+	        $this->primary_key = 'id';
+	        parent::__construct();
+	    }
+
+		public function model_get(){
+	        $data = $this->example
+	            ->select('*')
+	            ->join('example2', 'example.id = example2.id')
+	            ->get_all();
+	        $this->res(array('data' => $data));
+	    }
+
+	    public function model2_get(){
+	        $data = $this->model('example2')->get_all();
+	        $this->res(array('data' => $data));
+	    }
+	}
+By configuring **rest.php** of $auto_model, if auto_model = default, You will want to write in the model folder corresponding model, but this model is still loaded automatically good. 
+
 ## Handling Requests
 
 When your controller extends from `REST_Controller`, the method names will be appended with the HTTP method used to access the request. If you're  making an HTTP `GET` call to `/books`, for instance, it would call a `Books#index_get()` method.

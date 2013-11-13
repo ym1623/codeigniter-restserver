@@ -18,6 +18,14 @@ require APPPATH.'/libraries/REST_Controller.php';
 
 class Example extends REST_Controller
 {
+
+    function __construct()
+    {
+        // $this->_db = 'test';
+        // $this->primary_key = 'id';
+        parent::__construct();
+    }
+
 	function user_get()
     {
         if(!$this->get('id'))
@@ -92,4 +100,18 @@ class Example extends REST_Controller
 	{
 		var_dump($this->put('foo'));
 	}
+
+    public function model_get(){
+        $data = $this->example
+            ->select('*')
+            ->join('example2', 'example.id = example2.id')
+            ->get_all();
+        $this->res(array('data' => $data));
+    }
+
+    public function model2_get(){
+        $data = $this->model('example')->get_all();
+        $this->res(array('data' => $data));
+    }
+
 }

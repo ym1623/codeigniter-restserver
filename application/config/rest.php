@@ -22,7 +22,7 @@ $config['force_https'] = FALSE;
 |	Default: xml
 |
 */
-$config['rest_default_format'] = 'xml';
+$config['rest_default_format'] = 'json';
 
 /*
 |--------------------------------------------------------------------------
@@ -59,7 +59,7 @@ $config['rest_realm'] = 'REST API';
 |	'' = no login required, 'basic' = unsecure login, 'digest' = more secure login
 |
 */
-$config['rest_auth'] = false;
+$config['rest_auth'] = '';
 
 /*
 |--------------------------------------------------------------------------
@@ -95,7 +95,7 @@ $config['auth_source'] = 'ldap';
 // $config['auth_override_class_method']['deals']['view'] = 'none';
 // $config['auth_override_class_method']['deals']['insert'] = 'digest';
 // $config['auth_override_class_method']['accounts']['user'] = 'basic';
-
+// $config['auth_override_class_method']['api']['example']['user'] = 'none';
 /*
 |--------------------------------------------------------------------------
 | REST Login usernames
@@ -106,7 +106,7 @@ $config['auth_source'] = 'ldap';
 |	array('admin' => '1234')
 |
 */
-$config['rest_valid_logins'] = array('admin' => '1234');
+$config['rest_valid_logins'] = array('admin' => '123456');
 
 /*
 |--------------------------------------------------------------------------
@@ -223,7 +223,7 @@ $config['rest_key_length'] = 40;
 | Default: X-API-KEY
 |
 */
-$config['rest_key_name'] = 'X-API-KEY';
+$config['rest_key_name'] = 'baby_api';
 
 /*
 |--------------------------------------------------------------------------
@@ -336,6 +336,20 @@ $config['rest_ignore_http_accept'] = FALSE;
 |
 */
 $config['rest_ajax_only'] = FALSE;
+
+
+/*
+|--------------------------------------------------------------------------
+| REST AUTO Model
+|--------------------------------------------------------------------------
+|which type of model?
+|If this type = default, the model which must establish the
+|appropriate model file in this models, but this model
+|will come loaded based on the current controller.
+|if this type = auto, Depending on the controller class name, 
+|automatically loads the appropriate model.
+*/
+$config['auto_model'] = 'auto';
 
 /* End of file config.php */
 /* Location: ./system/application/config/rest.php */
